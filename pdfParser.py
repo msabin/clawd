@@ -1,6 +1,14 @@
 import fitz  # PyMuPDF
 import xml.etree.ElementTree as ET
 
+class QA:
+    def __init__(self, question):
+        self.question = question
+        self.answer = ""
+
+
+
+
 def convert_pdf_to_xml(pdf_path, xml_path):
     # Load the PDF document
     pdf_document = fitz.open(pdf_path)
@@ -42,23 +50,48 @@ def match_question_marks():
 
         responses = []
         sentence = ""
+        paragraph = ""
+        question = ""
+        waitingResponse = False
         firstResponse = ""
         for letter in text:
             sentence += letter
-            if letter == ":":
+
+            if letter == ".":
+                if waitingResponse:
+                    qa.answer += sentence
+
                 sentence = ""
+
             
             
             if letter == "?":
+                if not waitingResponse:
+                    qa = QA(sentence)
+                    waitingResponse = True
+                    sentence = ""
+                else: break
+
+                qa.answer = paragraph
+
+                question = sentence
+                waitingResponse = True
+
+                sentence = ""
+                paragraph = ""
                 if firstResponse == "":
                     firstResponse = sentence
                 responses.append(sentence)
             
 
 
-        print(firstResponse)  
-        # out.write(text) # write text of page
-        # out.write(bytes((12,))) # write page delimiter (form feed 0x0C)
+    print(qa.question)
+    print(qa.answer)  
+    # out.write(text) # write text of page
+    # out.write(bytes((12,))) # write page delimiter (form feed 0x0C)
     out.close()
 
 match_question_marks()
+
+
+
